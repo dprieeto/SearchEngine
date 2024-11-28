@@ -10,15 +10,19 @@ import java.util.Scanner;
  * @author Prieto
  */
 public class Aplicacion {
-    
+
     private static SolrServer server;
 
     public static void main(String[] args) {
-        init();
-        start(); // inicia servidor de solr
+        //init();//controlador con facade para client y servidor¿?
+        //start(); // inicia servidor de solr
+
         SolrClient cliente = new SolrClientImp();
-        cliente.leerArchivoDelCorpus(null);
-        stop(); // para el servidor al introducir -1 en consola
+        cliente.leerArchivoContenido(null);
+        
+        cliente.leerArchivoConsultas(null);
+
+        //stop(); // para el servidor al introducir -1 en consola
     }
 
     private static void init() {
@@ -39,5 +43,5 @@ public class Aplicacion {
             opcion = sc.nextLine();
         }
         server.stopSolr();
-    }    
+    }
 }
