@@ -14,15 +14,15 @@ public class Aplicacion {
     private static SolrServer server;
 
     public static void main(String[] args) {
-        //init();//controlador con facade para client y servidor¿?
-        //start(); // inicia servidor de solr
-
+        init();//controlador con facade para client y servidor¿?
+        start(); // inicia servidor de solr
+        
         SolrClient cliente = new SolrClientImp();
         cliente.leerArchivoContenido(null);
         
         cliente.leerArchivoConsultas(null);
-
-        //stop(); // para el servidor al introducir -1 en consola
+        
+        stop(); // para el servidor al introducir -1 en consola
     }
 
     private static void init() {
@@ -33,7 +33,12 @@ public class Aplicacion {
         System.out.println("Iniciando Solr");
         server.startSolr();
         server.seeStatus();
-        server.createCore();
+        if(server.isCoreCreated(null))
+            server.deleteCore(null);
+        server.createCore(null);
+        
+        server.addSchemaField("indice", "text_general");
+        server.addSchemaField("texto", "text_en");
     }
 
     private static void stop() {

@@ -32,11 +32,11 @@ public class SolrClientImp implements SolrClient {
             String carpAct = System.getProperty("user.dir");
             String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
             Scanner scan = new Scanner(new File(fileName));
-            String index, text;
-            index = text = null;
+            String index;
+            index = null;
             StringBuilder sb = new StringBuilder();
             borrarTodosLosDocumentos();
-
+            System.out.println("\nAnalizando documentos para su parse, espere.");
             while (scan.hasNextLine()) {
                 String line = scan.nextLine();
                 if (line.startsWith(".I")) {
@@ -51,7 +51,7 @@ public class SolrClientImp implements SolrClient {
                 } else if (line.startsWith(".W")) {
                     continue;
                 } else {
-                    text = line.trim();
+                    String text = line.trim();
                     sb.append(text).append(" ");
                 }
             }
@@ -66,7 +66,7 @@ public class SolrClientImp implements SolrClient {
 
     @Override
     public void indexaDocumento(String indice, String texto) {
-        HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_COLLECTION + Constantes.NOMBRE_COLECCION).build();
+        HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_COLLECTION + Constantes.NOMBRE_DEFAULT_COLECCION).build();
         //Create solr document
         SolrInputDocument doc = new SolrInputDocument();
 
@@ -83,7 +83,7 @@ public class SolrClientImp implements SolrClient {
     @Override
     public void borrarTodosLosDocumentos() {
         //Preparing the Solr client 
-        String urlString = "http://localhost:8983/solr/" + Constantes.NOMBRE_COLECCION;
+        String urlString = "http://localhost:8983/solr/" + Constantes.NOMBRE_DEFAULT_COLECCION;
         HttpSolrClient Solr = new HttpSolrClient.Builder(urlString).build();
 
         //Preparing the Solr document 
@@ -109,20 +109,19 @@ public class SolrClientImp implements SolrClient {
             String carpAct = System.getProperty("user.dir");
             String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
             Scanner scan = new Scanner(new File(fileName));
-            String index, text, consulta;
-            index = text = consulta = null;
+            String index;
+            index = null;
             StringBuilder sb = new StringBuilder();
             //borrarTodosLosDocumentos();
-
+            System.out.println("\nAnalizando documentos de consultas, espere.");
             while (scan.hasNextLine()) {
                 String line = scan.nextLine();
                 if (line.startsWith(".I")) {
                     if (index != null) {
                         String texto = sb.toString();
-                        consulta = obtenerLasPrimeras5Palabras(texto);
+                        String consulta = obtenerLasPrimeras5Palabras(texto);
                         hacerConsulta(index, consulta);
                         sb.setLength(0); //reset
-                        //break;
                     }
                     String[] parts = line.split(" ");
                     index = parts[1];
@@ -130,13 +129,14 @@ public class SolrClientImp implements SolrClient {
                 } else if (line.startsWith(".W")) {
                     continue;
                 } else {
-                    text = line.trim();
+                    String text = line.trim();
                     sb.append(text).append(" ");
                 }
             }
-            if (index != null) {
+            if (index != null && sb.length()>0) {
+                String texto = sb.toString().trim();
+                String consulta = obtenerLasPrimeras5Palabras(texto);
                 hacerConsulta(index, consulta);
-                //indexaDocumento(index, sb.toString());
             }
             //System.out.println("\nTodos los documentos fueron parseados e indexados correctamente.");
         } catch (FileNotFoundException ex) {
@@ -148,18 +148,16 @@ public class SolrClientImp implements SolrClient {
     public void hacerConsulta(String indice, String consulta) {
         try {
             String consultaCorta = obtenerLasPrimeras5Palabras(consulta);
-            HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_COLLECTION+Constantes.NOMBRE_COLECCION).build();
+            HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_COLLECTION+Constantes.NOMBRE_DEFAULT_COLECCION).build();
             
             SolrQuery query = new SolrQuery();
             //query.setQuery("texto:\""+ consulta + "\""); //busca la consulta como si fuera una frase
             query.setQuery("texto:" + consultaCorta);
             query.setRows(20);
             
-            //query.addFilterQuery("cat:electronics");
-            //query.setFields("texto");
             QueryResponse rsp = solr.query(query);
             SolrDocumentList docs = rsp.getResults();
-            System.out.println("\nNumero consulta: " + indice + "\n");
+            System.out.println("\nNumero consulta: " + indice + "\nConsulta: " + consulta +"\n");
             for (int i = 0; i < docs.size(); ++i) {
                 System.out.println(docs.get(i));
             }
@@ -172,7 +170,7 @@ public class SolrClientImp implements SolrClient {
     }
     
     private String obtenerLasPrimeras5Palabras(String texto) {
-        String regex = "[ .,;:!()]+"; //expresion regular para omitir esos caracteres en la palabra
+        String regex = "[ .,;:!()-]+"; //expresion regular para omitir esos caracteres en la palabra
         StringBuilder sb = new StringBuilder();
         String palabras[] = texto.split(regex);
         

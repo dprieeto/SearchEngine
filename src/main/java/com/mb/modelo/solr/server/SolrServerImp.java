@@ -1,9 +1,22 @@
 package com.mb.modelo.solr.server;
 
 import com.mb.modelo.solr.Comandos;
+import com.mb.modelo.solr.Constantes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.client.solrj.request.schema.SchemaRequest;
+import org.apache.solr.client.solrj.request.schema.SchemaRequest.AddField;
+import org.apache.solr.client.solrj.response.CoreAdminResponse;
+import org.apache.solr.common.params.CoreAdminParams.CoreAdminAction;
 
 /**
  *
@@ -32,8 +45,20 @@ public class SolrServerImp implements SolrServer {
     }
 
     @Override
-    public void createCore() {
-        executeCommand(null, Comandos.CREATE_CORE);
+    public void createCore(String nombre) {
+        if (nombre == null) {
+            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
+        }
+        executeCommand(null, Comandos.CREATE_CORE + nombre);
+    }
+
+    @Override
+    public void deleteCore(String nombre) {
+        if (nombre == null) {
+            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
+        }
+        System.out.println("\n Eliminando coleccion.");
+        executeCommand(null, Comandos.DELETE_CORE + nombre);
     }
 
     @Override
@@ -88,6 +113,55 @@ public class SolrServerImp implements SolrServer {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    @Override
+    public boolean isCoreCreated(String nombre) {
+        boolean encontrado = false;
+        if (nombre == null) {
+            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
+        }
+        try (SolrClient solrClient = new HttpSolrClient.Builder(Comandos.Constantes.URL).build()) {
+            // realiza una consulta para obtener la lista de colecciones
+            CoreAdminRequest request = new CoreAdminRequest();
+            request.setAction(CoreAdminAction.STATUS);
+            CoreAdminResponse cores = request.process(solrClient);
+
+            if (cores.getCoreStatus().get(nombre) != null) {
+                encontrado = true;
+            }
+            //System.out.println(cores.getCoreStatus().get(nombre));           
+        } catch (SolrServerException | IOException e) {
+            System.err.println("\nSe ha producido un error al verificar el core." + e.getMessage());
+            return false;
+        }
+        return encontrado;
+    }
+
+    @Override
+    public void addSchemaField(String nombre, String tipo) {
+        String url = Constantes.URL_DEFAULT_COLLECTION;
+        try {
+            SolrClient solrClient = new HttpSolrClient.Builder(url).build();
+
+            Map<String, Object> propiedadesCampo = new HashMap<>();
+            propiedadesCampo.put("name", nombre);
+            propiedadesCampo.put("type", tipo);
+            propiedadesCampo.put("stored", true);
+            propiedadesCampo.put("indexed", true);
+            propiedadesCampo.put("uninvertible", true);
+            propiedadesCampo.put("multiValued", false);
+            propiedadesCampo.put("required", false);
+
+            // Crear una solicitud para agregar un nuevo campo
+            AddField addFieldRequest = new AddField(propiedadesCampo);
+            solrClient.request(addFieldRequest);
+
+            System.out.println("\nSe ha agregado el campo " + nombre + " correctamente");
+        } catch (SolrServerException | IOException ex) {
+            Logger.getLogger(SolrServerImp.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
 }
