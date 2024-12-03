@@ -144,14 +144,7 @@ public class SolrServerImp implements SolrServer {
         try {
             SolrClient solrClient = new HttpSolrClient.Builder(url).build();
 
-            Map<String, Object> propiedadesCampo = new HashMap<>();
-            propiedadesCampo.put("name", nombre);
-            propiedadesCampo.put("type", tipo);
-            propiedadesCampo.put("stored", true);
-            propiedadesCampo.put("indexed", true);
-            propiedadesCampo.put("uninvertible", true);
-            propiedadesCampo.put("multiValued", false);
-            propiedadesCampo.put("required", false);
+            Map<String, Object> propiedadesCampo = Field.getDefaultField(nombre, tipo);
 
             // Crear una solicitud para agregar un nuevo campo
             AddField addFieldRequest = new AddField(propiedadesCampo);
