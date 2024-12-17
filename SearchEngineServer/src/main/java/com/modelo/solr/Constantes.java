@@ -6,7 +6,7 @@ package com.modelo.solr;
  */
 public class Constantes {
 
-    public static final String DOCS_RUTA = "";
+    public static final String DOCS_RUTA = "\\src\\corpus\\";
 
     public static final String URL_SOLR = "http://localhost:8983/solr/";
 
@@ -19,4 +19,6 @@ public class Constantes {
     public static final String NOMBRE_ARCHIVO_CONSULTAS = "MED.QRY";
     
     public static final String SCHEMA_TEXT_FIELD = "texto";
+    
+    public static final String STOPWORDS_PATH = "C:\\solr\\server\\solr\\MedicalCollection\\conf\\stopwords.txt";
 }

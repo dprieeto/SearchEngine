@@ -20,11 +20,9 @@ public interface SolrServer {
     /**
      * Crea una coleccion
      *
-     * @param nombre Nombre de la coleccion, si nombre=null se creara con el
-     * nombre por defecto.
      * @see com.modelo.solr.Comandos.Constantes
      */
-    public void createCore(String nombre);
+    public void createCore();
 
     public void stopSolr();
     
@@ -38,11 +36,11 @@ public interface SolrServer {
     /**
      * Borra una coleccion.
      *
-     * @param nombre Nombre de la coleccion, si nombre=null se creara con el
-     * nombre por defecto.
      * @see com.modelo.solr.Comandos.Constantes
      */
-    public void deleteCore(String nombre);
+    public void deleteCore();
+    
+    public CoreConf getCore();
     
     /**
      * Verifica si existe la coleccion pasada por parametro. Si el valor es null
@@ -50,13 +48,13 @@ public interface SolrServer {
      * @param nombre
      * @return true si la coleccion existe.
      */
-    public boolean isCoreCreated(String nombre);
+    //public boolean isCoreCreated(String nombre);
     
     /**
      *  Añade un campo a la coleccion por defecto mediante SchemaRequest.
      * @param nombre nombre del campo
      * @param tipo tipo del campo. p.ej: 'text_en'
      */
-    public void addSchemaField(String nombre, String tipo);
+    //public void addSchemaField(String nombre, String tipo);
 
 }

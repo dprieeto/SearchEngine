@@ -4,6 +4,9 @@ import com.modelo.solr.Constantes;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +41,8 @@ public class SolrClientImp implements SolrClient {
                 nombreArchivo = Constantes.NOMBRE_ARCHIVO_CORPUS;
             }
             String carpAct = System.getProperty("user.dir");
-            String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
+            //String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
+            String fileName = carpAct + Constantes.DOCS_RUTA + nombreArchivo;
             Scanner scan = new Scanner(new File(fileName));
             String index;
             index = null;
@@ -115,7 +119,8 @@ public class SolrClientImp implements SolrClient {
                 nombreArchivo = Constantes.NOMBRE_ARCHIVO_CONSULTAS;
             }
             String carpAct = System.getProperty("user.dir");
-            String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
+            //String fileName = carpAct + "\\src\\corpus\\" + nombreArchivo;
+            String fileName = carpAct + Constantes.DOCS_RUTA + nombreArchivo;
             Scanner scan = new Scanner(new File(fileName));
             String index;
             index = null;
@@ -155,13 +160,13 @@ public class SolrClientImp implements SolrClient {
     @Override
     public void hacerConsulta(String indice, String consulta) {
         try {
-            String consultaCorta = obtenerLasPrimeras5Palabras(consulta);
+            //String consultaTransformada = obtenerLasPrimeras5Palabras(consulta);
+            String consultaTransformada = transformarTextoConsulta(consulta);
             HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_SOLR + Constantes.NOMBRE_DEFAULT_COLECCION).build();
 
             SolrQuery query = new SolrQuery();
             //query.setQuery("texto:\""+ consulta + "\""); //busca la consulta como si fuera una frase
-            query.setQuery("texto:" + consultaCorta);
-
+            query.setQuery("texto:" + consultaTransformada);
             query.setFields("indice", "score");
             query.setRows(20);
 
@@ -170,7 +175,7 @@ public class SolrClientImp implements SolrClient {
             SolrDocumentList docs = rsp.getResults();
             long encontrados = rsp.getResults().getNumFound();
             System.out.println("\nNumero consulta: " + indice + "\nConsulta: "
-                    + consultaCorta + "\nDocumentos encontrados: " + encontrados + "\n");
+                    + consultaTransformada + "\nDocumentos encontrados: " + encontrados + "\n");
             for (int i = 0; i < docs.size(); ++i) {
 
                 System.out.println(docs.get(i));
@@ -197,15 +202,46 @@ public class SolrClientImp implements SolrClient {
         //System.out.println(sb.toString());
         return sb.toString();
     }
+    
+    private String transformarTextoConsulta(String texto) {
+        String regex = "[ .,;:!()-]+"; // el + indica que paparece 1 o mas veces
 
+        StringBuilder sb = new StringBuilder();
+        String palabras[] = texto.split(regex);
+
+        for (int i = 0; i < palabras.length; i++) {
+            sb.append(palabras[i]);
+            if (i < palabras.length - 1) {
+                sb.append("+");
+            }
+        }
+        //System.out.println(sb.toString());
+        return sb.toString();
+    }
+
+    /**
+     * utilizar mejor un stopswords generico,
+     * https://github.com/stopwords-iso/stopwords-en/tree/master/raw
+     */
     @Override
     public void actualizarPalabrasVacias() {
-        try {
+        //try {
             List<String> frequentTerms = getTopFrequentTerms();
-            int maxNewStopWords = 50;
+            int maxNewStopWords = 100;
             List<String> newStopWords = frequentTerms.subList(0, maxNewStopWords - 1);
-            String stopWords = String.join(",", newStopWords);
-
+            //String stopWords = String.join("\n", newStopWords);
+            
+            try {
+                String ruta = Constantes.STOPWORDS_PATH;
+                // Escribir las stop words en el archivo
+                Files.write(Paths.get(ruta), newStopWords, StandardOpenOption.APPEND);
+                //Files.write(Paths.get(ruta), newStopWords);
+                System.out.println("Stop words añadidas correctamente al archivo.");
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            /*
             String url = Constantes.URL_DEFAULT_COLLECTION;
             HttpSolrClient solr = new HttpSolrClient.Builder(url).build();
 
@@ -218,10 +254,12 @@ public class SolrClientImp implements SolrClient {
             update.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
 
             solr.request(update);
-            System.out.println("Palabras vacias actualizadas");
+            */
+            
+            System.out.println("Palabras vacias actualizadas");/*
         } catch (SolrServerException | IOException ex) {
             Logger.getLogger(SolrClientImp.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
 
     }
 
@@ -258,7 +296,7 @@ public class SolrClientImp implements SolrClient {
             for (Term t : terms) {
                 frequentTerms.add(t.getTerm());
             }
-
+            System.out.println("\nNº de terminos frecuentes: " + terms.size());
         } catch (SolrServerException | IOException ex) {
             Logger.getLogger(SolrClientImp.class.getName()).log(Level.SEVERE, null, ex);
         }
