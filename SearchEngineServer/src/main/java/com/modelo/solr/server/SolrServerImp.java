@@ -1,18 +1,9 @@
 package com.modelo.solr.server;
 
 import com.modelo.solr.Comandos;
-import com.modelo.solr.Constantes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.request.CoreAdminRequest;
-import org.apache.solr.client.solrj.request.schema.SchemaRequest.AddField;
-import org.apache.solr.client.solrj.response.CoreAdminResponse;
-import org.apache.solr.common.params.CoreAdminParams.CoreAdminAction;
 
 /**
  *
@@ -22,8 +13,16 @@ public class SolrServerImp implements SolrServer {
 
     private Process process;
 
-    public SolrServerImp() {
+    private CoreConf core;
+
+    public SolrServerImp(String coreName) {
         process = null;
+        core = new CoreConf(coreName);
+    }
+
+    @Override
+    public CoreConf getCore() {
+        return core;
     }
 
     @Override
@@ -41,18 +40,18 @@ public class SolrServerImp implements SolrServer {
     }
 
     @Override
-    public void createCore(String nombre) {
-        if (nombre == null) {
-            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
-        }
+    public void createCore() {
+        //core = new CoreConf(nombre);
+        String nombre = core.getCoreName();//core.setCoreName(nombre);
         executeCommand(null, Comandos.CREATE_CORE + nombre);
     }
 
     @Override
-    public void deleteCore(String nombre) {
-        if (nombre == null) {
-            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
-        }
+    public void deleteCore() {
+        /*if (nombre == null) {
+            nombre = core.getCoreName();//Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
+        }*/
+        String nombre = core.getCoreName();
         System.out.println("\n Eliminando coleccion.");
         executeCommand(null, Comandos.DELETE_CORE + nombre);
     }
@@ -107,50 +106,9 @@ public class SolrServerImp implements SolrServer {
                 }
             } catch (IOException e) {
                 System.err.println("\nError al leer la salida del proceso.\n" + e.getMessage());
-                
+
             }
         }).start();
     }
-
-    @Override
-    public boolean isCoreCreated(String nombre) {
-        boolean encontrado = false;
-        if (nombre == null) {
-            nombre = Comandos.Constantes.NOMBRE_DEFAULT_COLECCION;
-        }
-        try (SolrClient solrClient = new HttpSolrClient.Builder(Comandos.Constantes.URL).build()) {
-            // realiza una consulta para obtener la lista de colecciones
-            CoreAdminRequest request = new CoreAdminRequest();
-            request.setAction(CoreAdminAction.STATUS);
-            CoreAdminResponse cores = request.process(solrClient);
-
-            if (cores.getCoreStatus().get(nombre) != null) {
-                encontrado = true;
-            }
-            //System.out.println(cores.getCoreStatus().get(nombre));           
-        } catch (SolrServerException | IOException e) {
-            System.err.println("\nSe ha producido un error al verificar el core." + e.getMessage());
-            return false;
-        }
-        return encontrado;
-    }
-
-    @Override
-    public void addSchemaField(String nombre, String tipo) {
-        String url = Constantes.URL_DEFAULT_COLLECTION;
-        try {
-            SolrClient solrClient = new HttpSolrClient.Builder(url).build();
-
-            Map<String, Object> propiedadesCampo = Field.getDefaultField(nombre, tipo);
-
-            // Crear una solicitud para agregar un nuevo campo
-            AddField addFieldRequest = new AddField(propiedadesCampo);
-            solrClient.request(addFieldRequest);
-
-            System.out.println("\nSe ha agregado el campo " + nombre + " correctamente");
-        } catch (SolrServerException | IOException ex) {
-            System.err.println("\nError al agregar un nuevo campo al Schema.\n" + ex.getMessage());
-        }
-    } 
 
 }
