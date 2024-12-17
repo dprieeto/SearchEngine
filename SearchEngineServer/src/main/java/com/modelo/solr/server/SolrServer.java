@@ -19,10 +19,11 @@ public interface SolrServer {
 
     /**
      * Crea una coleccion
-     *
+     * @param nombre nombre de la coleccion,si es null se utiliza la coleccion
+     * por defecto.
      * @see com.modelo.solr.Comandos.Constantes
      */
-    public void createCore();
+    public void createCore(String nombre);
 
     public void stopSolr();
     

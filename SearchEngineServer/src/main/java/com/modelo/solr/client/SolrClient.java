@@ -12,8 +12,8 @@ public interface SolrClient {
     
     /**
      * 
-     * @param indice numero de documento
-     * @param texto 
+     * @param indice numero del documento
+     * @param texto  cuerpo del documento
      */
     public void indexaDocumento(String indice, String texto);
 
@@ -24,7 +24,7 @@ public interface SolrClient {
     /**
      * 
      * @param indice numero de consulta
-     * @param consulta 
+     * @param consulta cuerpo de la consulta
      */
     public void hacerConsulta(String indice, String consulta);
     

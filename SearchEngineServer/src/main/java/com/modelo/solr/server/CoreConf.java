@@ -4,8 +4,6 @@ import com.modelo.solr.Comandos;
 import com.modelo.solr.Constantes;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -23,7 +21,10 @@ import org.apache.solr.common.params.CoreAdminParams;
  */
 public class CoreConf {
 
-    private final String coreName;
+    private String coreName;
+
+    public CoreConf() {
+    }
 
     public CoreConf(String nombre) {
         if (nombre == null) {
@@ -37,9 +38,17 @@ public class CoreConf {
         return coreName;
     }
 
+    public void setCoreName(String coreName) {
+        if (coreName == null) {
+            this.coreName = Constantes.NOMBRE_DEFAULT_COLECCION;
+        } else {
+            this.coreName = coreName;
+        }
+    }    
+
     /**
-     * Verifica si existe la coleccion pasada por parametro. Si el valor es null
-     * se verifica la coleccion por defecto.
+     * Verifica si existe la coleccion. Si el valor es null se verifica la
+     * coleccion por defecto.
      *
      * @return true si la coleccion existe.
      */
@@ -67,13 +76,13 @@ public class CoreConf {
     }
 
     /**
-     * Añade un campo a la coleccion por defecto mediante SchemaRequest.
+     * Añade un campo a la coleccion mediante SchemaRequest.
      *
      * @param nombre nombre del campo
      * @param tipo tipo del campo. p.ej: 'text_en'
      */
     public void addSchemaField(String nombre, String tipo) {
-        String url = Constantes.URL_DEFAULT_COLLECTION;
+        String url = Constantes.URL_SOLR + getCoreName();
         try {
             SolrClient solrClient = new HttpSolrClient.Builder(url).build();
 
@@ -92,7 +101,6 @@ public class CoreConf {
     public int contarDocumentosIndexados() {
         int documentos = -1;
         try {
-
             HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_SOLR + Constantes.NOMBRE_DEFAULT_COLECCION).build();
 
             SolrQuery query = new SolrQuery();

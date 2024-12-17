@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -16,14 +15,11 @@ import java.util.logging.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.client.solrj.response.TermsResponse.Term;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.util.NamedList;
 
 /**
  *
@@ -114,6 +110,7 @@ public class SolrClientImp implements SolrClient {
 
     @Override
     public void leerArchivoConsultas(String nombreArchivo) {
+        System.out.println("Escaneando archivo de consultas. Espere");
         try {
             if (nombreArchivo == null || nombreArchivo.isBlank()) {
                 nombreArchivo = Constantes.NOMBRE_ARCHIVO_CONSULTAS;

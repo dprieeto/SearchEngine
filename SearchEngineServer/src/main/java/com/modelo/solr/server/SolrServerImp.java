@@ -1,6 +1,7 @@
 package com.modelo.solr.server;
 
 import com.modelo.solr.Comandos;
+import com.modelo.solr.Constantes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,9 +16,9 @@ public class SolrServerImp implements SolrServer {
 
     private CoreConf core;
 
-    public SolrServerImp(String coreName) {
+    public SolrServerImp() {
         process = null;
-        core = new CoreConf(coreName);
+        core = new CoreConf();
     }
 
     @Override
@@ -40,10 +41,12 @@ public class SolrServerImp implements SolrServer {
     }
 
     @Override
-    public void createCore() {
-        //core = new CoreConf(nombre);
-        String nombre = core.getCoreName();//core.setCoreName(nombre);
-        executeCommand(null, Comandos.CREATE_CORE + nombre);
+    public void createCore(String nombre) {
+        if(nombre == null)
+            nombre = Constantes.NOMBRE_DEFAULT_COLECCION;
+        core.setCoreName(nombre);
+        //nombre = core.getCoreName();//core.setCoreName(nombre);
+        executeCommand(null, Comandos.CREATE_CORE + core.getCoreName());
     }
 
     @Override

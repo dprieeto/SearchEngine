@@ -1,4 +1,4 @@
-package com.modelo.solr.evaluacion;
+package com.modelo.evaluacion;
 
 /**
  *
