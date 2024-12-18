@@ -7,9 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,11 +18,14 @@ import java.util.logging.Logger;
  */
 public class StopWords {
 
+    /**
+     * Nombre del fichero stopwords que se va a utilizar
+     */
     private final String nombreArchivo;
 
     public StopWords(String nombreArchivo) {
         if (nombreArchivo == null) {
-            nombreArchivo = Constantes.STOPWORDS_DEFAULT_FILE;
+            nombreArchivo = Constantes.STOPWORDS_DEFAULT_FILE; // fichero por defecto
         }
         this.nombreArchivo = nombreArchivo;
     }
@@ -39,7 +40,7 @@ public class StopWords {
     }
      */
     /**
-     * utilizar mejor un stopswords generico,
+     * Actualiza las stopwords de la colecccion
      * https://github.com/stopwords-iso/stopwords-en/tree/master/raw
      */
     public void actualizarPalabrasVacias() {
@@ -59,6 +60,10 @@ public class StopWords {
         System.out.println("Palabras vacias actualizadas");
     }
 
+    /**
+     * Lee el fichero stopwords seleccionado y lo devuelve
+     * @return 
+     */
     private Set<String> getStopWords() {
         BufferedReader br = null;
         Set<String> stopWords = new HashSet<>();

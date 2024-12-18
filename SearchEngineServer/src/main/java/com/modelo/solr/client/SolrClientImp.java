@@ -1,12 +1,15 @@
 package com.modelo.solr.client;
 
+import com.modelo.evaluacion.DocumentoRecuperado;
 import com.modelo.solr.Constantes;
 import com.modelo.solr.server.CoreConf;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +19,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.client.solrj.response.TermsResponse.Term;
-import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 /**
@@ -27,8 +30,14 @@ public class SolrClientImp implements SolrClient {
 
     private CoreConf core;
     
+    private List<DocumentoRecuperado> documentos;
+    
+    private Map<Integer,List<DocumentoRecuperado>> consultasResultados;
+    
     public SolrClientImp(CoreConf core) {
         this.core = core;
+        documentos = new ArrayList<>();
+        consultasResultados = new HashMap<>();
     }
 
     @Override
@@ -166,8 +175,8 @@ public class SolrClientImp implements SolrClient {
             //query.setQuery("texto:\""+ consulta + "\""); //busca la consulta como si fuera una frase
             query.setQuery("texto:" + consultaTransformada);
             query.setFields("indice", "score");
-            query.setRows(20);
-
+            //query.setRows(0);
+            /*
             QueryResponse rsp = solr.query(query);
 
             SolrDocumentList docs = rsp.getResults();
@@ -177,11 +186,56 @@ public class SolrClientImp implements SolrClient {
             for (int i = 0; i < docs.size(); ++i) {
 
                 System.out.println(docs.get(i));
+            }*/
+            int rows = 100; // Número de documentos por página
+            int start = 0;
+            long totalDocuments;
+             QueryResponse countResponse = solr.query(query);
+            totalDocuments = countResponse.getResults().getNumFound();
+
+            System.out.println("####################### consulta " + indice);
+            System.out.println("documentos encontrados: " + totalDocuments);
+            System.out.println("######################");
+            //documentos= new ArrayList<>();
+            while (start < totalDocuments) {
+                query.setStart(start);
+                query.setRows(rows); // Establecer el número de documentos a recuperar
+
+                QueryResponse response = solr.query(query);
+                List<SolrDocument> documents = response.getResults();
+
+                // Mostrar los documentos recuperados
+                for (int i = 0; i<documents.size(); i++) { 
+                    String index = indice;
+                    String numDoc = documents.get(i).getFieldValue("indice").toString();
+                    String rank = String.valueOf(i + 1 + start);
+                    String scoreDoc = documents.get(i).getFieldValue("score").toString();
+                    /*
+                    int index = Integer.valueOf(indice);
+                    long numDoc = Long.parseLong(documents.get(i).getFieldValue("indice").toString());
+                    int rank = i+1+start;
+                    long scoreDoc = Long.parseLong((String) documents.get(i).getFieldValue("score"));
+                    *///System.out.println(doc);
+                    DocumentoRecuperado dr = new DocumentoRecuperado(index, numDoc, rank, scoreDoc);
+                    //System.out.println(dr.toString());
+                    documentos.add(dr);
+                }
+
+                start += rows; // Incrementar el inicio para la siguiente página
             }
+            //System.out.println("@@@@@@@@@@@@@@@@ \t" + documentos.size());
+            
+            consultasResultados.put(Integer.valueOf(indice), documentos);
+            
         } catch (SolrServerException | IOException ex) {
             System.err.println("\nError al realizar la consulta.\n" + ex.getMessage());
         }
 
+    }
+    
+    @Override
+    public Map<Integer, List<DocumentoRecuperado>> getConsultasResultados() {
+        return consultasResultados;
     }
 
     private String obtenerLasPrimeras5Palabras(String texto) {

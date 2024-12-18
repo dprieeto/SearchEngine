@@ -27,7 +27,7 @@ public class Evaluacion {
 
     private String stopwordsFile;
 
-    private String nameRelFile;
+    private String nameRelFile; //nombre del rel trec a generar
 
     private String trecevalResultFileName; //fichero generado por treceval
 
@@ -74,13 +74,13 @@ public class Evaluacion {
         String carpAct = System.getProperty("user.dir");
         String ruta = Constantes.EVALUATION_PATH;// + "\\resultados\\";
         String path = carpAct + ruta;
-        
+
         // omitir -q -a?
         String trecevalOpciones = " -q -a " + path;
         String trecevalArgumentos = "MED_REL.TREC " + nameRelFile;
         // ruta donde se guardan los resultados
-        String trecevalGuardar = " > " + path + "\\resultados\\" +this.trecevalResultFileName;
-        String comando = Constantes.TRECEVAL + trecevalOpciones 
+        String trecevalGuardar = " > " + path + "\\resultados\\" + this.trecevalResultFileName;
+        String comando = Constantes.TRECEVAL + trecevalOpciones
                 + trecevalArgumentos + trecevalGuardar;
 
         eliminarDocumento();

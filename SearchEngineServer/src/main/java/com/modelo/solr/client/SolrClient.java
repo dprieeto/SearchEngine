@@ -1,6 +1,8 @@
 package com.modelo.solr.client;
 
+import com.modelo.evaluacion.DocumentoRecuperado;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -29,4 +31,6 @@ public interface SolrClient {
     public void hacerConsulta(String indice, String consulta);
     
     public void actualizarPalabrasVacias(String nombreArchivo);
+    
+    public Map<Integer, List<DocumentoRecuperado>> getConsultasResultados();
 }

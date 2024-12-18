@@ -1,5 +1,6 @@
 package com.controlador;
 
+import com.modelo.evaluacion.Evaluacion;
 import com.modelo.solr.client.SolrClient;
 import com.modelo.solr.client.SolrClientImp;
 import com.modelo.solr.server.SolrServer;
@@ -16,6 +17,8 @@ public class Controlador {
 
     private SolrServer server;
 
+    private String stopWords;
+
     public Controlador() {
         cliente = null;
         server = new SolrServerImp();
@@ -29,6 +32,7 @@ public class Controlador {
 
     /**
      * Crea la coleccion indexa los documentos dependiendo de los parametros.
+     *
      * @param coreName nombre de la coleccion
      * @param deleteCore Si es true, borrara la coleccion y la volvera a crear,
      * false en caso contrario.
@@ -43,7 +47,7 @@ public class Controlador {
         String campoTipo = "string";
         String campo2 = "texto";
         String campoTipo2 = "text_general";
-        
+
         if (deleteCore) {
             server.deleteCore();
             server.createCore();
@@ -51,37 +55,37 @@ public class Controlador {
             server.getCore().addSchemaField(campo, campoTipo);
             server.getCore().addSchemaField(campo2, campoTipo2);
         }
-        
-        if(deleteDocuments)
-            cliente.leerArchivoContenido(null);
-        /**
-        if (!server.getCore().isCoreCreated()) {
-            server.createCore();
-            // añadir los campos a schema
-            server.getCore().addSchemaField(campo, campoTipo);
-            server.getCore().addSchemaField(campo2, campoTipo2);
-        }
 
-        if (deleteCore && server.getCore().isCoreCreated()) {
-            server.deleteCore();
-        }
-        
-        // si la coleccion existe
-        if (deleteDocuments && server.getCore().contarDocumentosIndexados() > 0 && server.getCore().isCoreCreated()) {
+        if (deleteDocuments) {
             cliente.leerArchivoContenido(null);
         }
-        
-        // si la coleccion existe y no hay documentos, se indexan
-        if (server.getCore().contarDocumentosIndexados() == 0 && server.getCore().isCoreCreated()) {
-            cliente.leerArchivoContenido(null);
-        }
-        * */
+        /**
+         * if (!server.getCore().isCoreCreated()) { server.createCore(); //
+         * añadir los campos a schema server.getCore().addSchemaField(campo,
+         * campoTipo); server.getCore().addSchemaField(campo2, campoTipo2); }
+         *
+         * if (deleteCore && server.getCore().isCoreCreated()) {
+         * server.deleteCore(); }
+         *
+         * // si la coleccion existe if (deleteDocuments &&
+         * server.getCore().contarDocumentosIndexados() > 0 &&
+         * server.getCore().isCoreCreated()) {
+         * cliente.leerArchivoContenido(null); }
+         *
+         * // si la coleccion existe y no hay documentos, se indexan if
+         * (server.getCore().contarDocumentosIndexados() == 0 &&
+         * server.getCore().isCoreCreated()) {
+         * cliente.leerArchivoContenido(null); }
+         *
+         */
 
     }
-    
-    
-    public void buildQueryConf() {
-        
+
+    public void doEvaluation() {
+        Evaluacion ev = new Evaluacion(stopWords);
+        ev.crearDocumentoEvaluacion(cliente.getConsultasResultados());
+        ev.evaluar();
+
     }
 
     /**
@@ -98,7 +102,9 @@ public class Controlador {
      * @see com.modelo.solr.Constantes#STOPWORDS_FILES_PATH
      */
     public void updateStopWords(String fileName) {
+        stopWords = fileName;
         cliente.actualizarPalabrasVacias(fileName);
+
     }
 
     /**

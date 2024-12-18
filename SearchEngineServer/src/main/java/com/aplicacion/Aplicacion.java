@@ -1,11 +1,6 @@
 package com.aplicacion;
 
 import com.controlador.Controlador;
-import com.modelo.solr.client.SolrClient;
-import com.modelo.solr.client.SolrClientImp;
-import com.modelo.solr.server.SolrServer;
-import com.modelo.solr.server.SolrServerImp;
-import java.util.Scanner;
 
 /**
  *
@@ -27,11 +22,15 @@ public class Aplicacion {
         ct.buildCoreConf(null, false, false);
 
         // actualizar palabras vacias:
-        String archivo = "stopwords-filter-en.txt";
+        String archivo = "stopwords-enDS.txt";
         ct.updateStopWords(archivo);
 
         // realizar consultas
         ct.doQuerys();
+
+        // realizar evaluacion
+        ct.doEvaluation();
+
         // parar solr
         ct.stopSolr();
 
