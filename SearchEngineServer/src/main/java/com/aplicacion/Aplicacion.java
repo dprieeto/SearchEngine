@@ -13,8 +13,6 @@ import java.util.Scanner;
  */
 public class Aplicacion {
 
-    private static SolrServer server;
-
     public static void main(String[] args) {
         run();
     }
@@ -23,13 +21,19 @@ public class Aplicacion {
         Controlador ct = new Controlador();
         // iniciar solr
         ct.startServer();
+
         // configurar coleccion
+        //ct.buildCoreConf(null, true, true);
         ct.buildCoreConf(null, false, false);
-        
+
+        // actualizar palabras vacias:
+        String archivo = "stopwords-filter-en.txt";
+        ct.updateStopWords(archivo);
+
         // realizar consultas
         ct.doQuerys();
         // parar solr
         ct.stopSolr();
-        
+
     }
 }

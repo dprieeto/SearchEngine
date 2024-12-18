@@ -39,12 +39,16 @@ public class SolrServerImp implements SolrServer {
     public void seeStatus() {
         executeCommand(null, Comandos.STATUS);
     }
-
+    
     @Override
-    public void createCore(String nombre) {
+    public void setCoreName(String nombre) {
         if(nombre == null)
             nombre = Constantes.NOMBRE_DEFAULT_COLECCION;
         core.setCoreName(nombre);
+    }
+
+    @Override
+    public void createCore() {        
         //nombre = core.getCoreName();//core.setCoreName(nombre);
         executeCommand(null, Comandos.CREATE_CORE + core.getCoreName());
     }

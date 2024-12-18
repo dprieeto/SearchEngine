@@ -20,5 +20,10 @@ public class Constantes {
     
     public static final String SCHEMA_TEXT_FIELD = "texto";
     
-    public static final String STOPWORDS_PATH = "C:\\solr\\server\\solr\\MedicalCollection\\conf\\stopwords.txt";
+    public static final String STOPWORDS_SOLR__FILE_PATH = "C:\\solr\\server\\solr\\MedicalCollection\\conf\\stopwords.txt";
+
+    public static final String STOPWORDS_FILES_PATH = DOCS_RUTA + "stopwords\\";
+    
+    public static final String STOPWORDS_DEFAULT_FILE = "stopwords_en.txt";
+    
 }

@@ -28,5 +28,5 @@ public interface SolrClient {
      */
     public void hacerConsulta(String indice, String consulta);
     
-    public void actualizarPalabrasVacias();
+    public void actualizarPalabrasVacias(String nombreArchivo);
 }

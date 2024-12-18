@@ -1,12 +1,10 @@
 package com.modelo.solr.client;
 
 import com.modelo.solr.Constantes;
+import com.modelo.solr.server.CoreConf;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -27,7 +25,10 @@ import org.apache.solr.common.SolrInputDocument;
  */
 public class SolrClientImp implements SolrClient {
 
-    public SolrClientImp() {
+    private CoreConf core;
+    
+    public SolrClientImp(CoreConf core) {
+        this.core = core;
     }
 
     @Override
@@ -74,7 +75,7 @@ public class SolrClientImp implements SolrClient {
 
     @Override
     public void indexaDocumento(String indice, String texto) {
-        HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_SOLR + Constantes.NOMBRE_DEFAULT_COLECCION).build();
+        HttpSolrClient solr = new HttpSolrClient.Builder(Constantes.URL_SOLR + core.getCoreName()).build();
         //Create solr document
         SolrInputDocument doc = new SolrInputDocument();
 
@@ -128,8 +129,8 @@ public class SolrClientImp implements SolrClient {
                 String line = scan.nextLine();
                 if (line.startsWith(".I")) {
                     if (index != null) {
-                        String texto = sb.toString();
-                        String consulta = obtenerLasPrimeras5Palabras(texto);
+                        String consulta = sb.toString();
+                        //String consulta = obtenerLasPrimeras5Palabras(texto);
                         hacerConsulta(index, consulta);
                         sb.setLength(0); //reset
                     }
@@ -144,8 +145,8 @@ public class SolrClientImp implements SolrClient {
                 }
             }
             if (index != null && sb.length() > 0) {
-                String texto = sb.toString().trim();
-                String consulta = obtenerLasPrimeras5Palabras(texto);
+                String consulta = sb.toString().trim();
+                //String consulta = obtenerLasPrimeras5Palabras(texto);
                 hacerConsulta(index, consulta);
             }
             //System.out.println("\nTodos los documentos fueron parseados e indexados correctamente.");
@@ -216,48 +217,11 @@ public class SolrClientImp implements SolrClient {
         return sb.toString();
     }
 
-    /**
-     * utilizar mejor un stopswords generico,
-     * https://github.com/stopwords-iso/stopwords-en/tree/master/raw
-     */
+
     @Override
-    public void actualizarPalabrasVacias() {
-        //try {
-            List<String> frequentTerms = getTopFrequentTerms();
-            int maxNewStopWords = 100;
-            List<String> newStopWords = frequentTerms.subList(0, maxNewStopWords - 1);
-            //String stopWords = String.join("\n", newStopWords);
-            
-            try {
-                String ruta = Constantes.STOPWORDS_PATH;
-                // Escribir las stop words en el archivo
-                Files.write(Paths.get(ruta), newStopWords, StandardOpenOption.APPEND);
-                //Files.write(Paths.get(ruta), newStopWords);
-                System.out.println("Stop words añadidas correctamente al archivo.");
-                
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            /*
-            String url = Constantes.URL_DEFAULT_COLLECTION;
-            HttpSolrClient solr = new HttpSolrClient.Builder(url).build();
-
-            SolrInputDocument doc = new SolrInputDocument();
-            doc.addField("id", "stopwords");
-            doc.addField("value", stopWords);
-
-            UpdateRequest update = new UpdateRequest();
-            update.add(doc);
-            update.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
-
-            solr.request(update);
-            */
-            
-            System.out.println("Palabras vacias actualizadas");/*
-        } catch (SolrServerException | IOException ex) {
-            Logger.getLogger(SolrClientImp.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-
+    public void actualizarPalabrasVacias(String fileName) {
+        StopWords stopWords = new StopWords(fileName);
+        stopWords.actualizarPalabrasVacias();
     }
 
     /**
