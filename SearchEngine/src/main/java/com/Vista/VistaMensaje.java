@@ -7,6 +7,10 @@ import javax.swing.JOptionPane;
  *
  * @author Prieto
  */
+/**
+ *
+ * @author Prieto
+ */
 public class VistaMensaje {
 
     /*
