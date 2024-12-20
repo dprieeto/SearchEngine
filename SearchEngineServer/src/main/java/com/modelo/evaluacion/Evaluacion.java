@@ -5,7 +5,6 @@ import com.modelo.solr.Constantes;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,20 +16,32 @@ import java.util.logging.Logger;
 
 /**
  *
- * @see
- * https://faculty.washington.edu/levow/courses/ling573_SPR2011/hw/trec_eval_desc.htm
+ * @see https://faculty.washington.edu/levow/courses/ling573_SPR2011/hw/trec_eval_desc.htm
  * @author Prieto
  */
 public class Evaluacion {
 
     private Process process;
 
+    /**
+     * Fichero stopwords que se ha utilizado
+     */
     private String stopwordsFile;
 
-    private String nameRelFile; //nombre del rel trec a generar
+    /**
+     * Nombre del rel trec a generar.
+     */
+    private String nameRelFile;
 
-    private String trecevalResultFileName; //fichero generado por treceval
+    /**
+     * Nombre del fichero generado por treceval
+     */
+    private String trecevalResultFileName;
 
+    /**
+     * Diccionario de las consultas realizadas con sus respectivas listas de 
+     * documentos recuperados/consulta.
+     */
     private Map<Integer, List<DocumentoRecuperado>> consultasRecuperadas;
 
     public Evaluacion(String stopwords) {
@@ -41,17 +52,22 @@ public class Evaluacion {
         consultasRecuperadas = new HashMap<>();
     }
 
+    /**
+     * Genera un archivo '.TREC' con los resultados obtenidos de cada consulta.
+     * @param consultas Diccionario de consultas con su respectiva lista de 
+     * documentos recuperados.
+     */
     public void crearDocumentoEvaluacion(Map<Integer, List<DocumentoRecuperado>> consultas) {
         consultasRecuperadas = consultas;
         // ruta donde se crea
         String carpAct = System.getProperty("user.dir");
-        String ruta = Constantes.EVALUATION_PATH;
+        String ruta = Constantes.EVALUATION_PATH + "\\resultados\\";
         String path = carpAct + ruta;
         String id = getPartName().toUpperCase(); // id del archivo de evaluacion
         trecevalResultFileName = "ev_" + id + ".txt";
         nameRelFile = "MED_REL_" + id + ".TREC"; //nombre dle archivo
         BufferedWriter br = null;
-
+        eliminarDocumentos();
         try {
             File archivo = new File(path + nameRelFile);
 
@@ -62,7 +78,6 @@ public class Evaluacion {
                     //StringBuilder sb = new StringBuilder();
                     br.write(docs.get(j).toString() + "\n");
                 }
-
             }
             System.out.println("Documento de trec " + nameRelFile + " creado");
         } catch (IOException ex) {
@@ -70,38 +85,54 @@ public class Evaluacion {
         }
     }
 
+    /**
+     * Realiza la evaluacion del fichero '.TREC' generado comparandola con 
+     * el MED_REL.TREC de documentos relevantes por consulta. Genera un archivo
+     * '.txt' de los valores medios de las metricas
+     */
     public void evaluar() {
         String carpAct = System.getProperty("user.dir");
-        String ruta = Constantes.EVALUATION_PATH;// + "\\resultados\\";
+        String ruta = Constantes.EVALUATION_PATH + "\\resultados\\";
         String path = carpAct + ruta;
 
-        // omitir -q -a?
-        String trecevalOpciones = " -q -a " + path;
-        String trecevalArgumentos = "MED_REL.TREC " + nameRelFile;
+        String trecevalOpciones = " -a " + path; 
+        String trecevalArgumentos = "MED_REL.TREC " + path + nameRelFile;
         // ruta donde se guardan los resultados
         String trecevalGuardar = " > " + path + "\\resultados\\" + this.trecevalResultFileName;
         String comando = Constantes.TRECEVAL + trecevalOpciones
                 + trecevalArgumentos + trecevalGuardar;
 
-        eliminarDocumento();
+        //eliminarDocumento();
         executeCommand(path, comando);
         System.out.println("Documento de evaluacion creado " + trecevalResultFileName);
     }
 
-    private void eliminarDocumento() {
+    /**
+     * Elimina todos los documentos en la carpeta 
+     * 'src/corpus/evaluacion/resultados'.
+     */
+    private void eliminarDocumentos() {
         String carpAct = System.getProperty("user.dir");
         String ruta = Constantes.EVALUATION_PATH;
         String path = carpAct + ruta + "resultados\\";
-        String fileName = trecevalResultFileName;
-        File archivo = new File(path + fileName);
-
-        if (archivo.delete()) {
-            System.out.println("Archivo eliminado " + fileName);
-        } else {
-            System.err.println("Error al eliminar el archivo " + fileName);
+        File carpeta = new File(path);
+        File[] archivos = carpeta.listFiles();
+        for (File f: archivos) {
+            if (!f.isDirectory()) {
+                f.delete();
+                System.out.println("Archivo eliminado " + f.getName());
+            } else {
+                System.err.println("Error al eliminar el archivo " + f.getName());
+            }
         }
+        
     }
 
+    /**
+     * 
+     * @param ruta
+     * @param comando 
+     */
     private synchronized void executeCommand(String ruta, String comando) {
         try {
             // Construir el comando completo
@@ -113,13 +144,6 @@ public class Evaluacion {
             ProcessBuilder pb = new ProcessBuilder();
             pb.directory(new java.io.File(ruta));
             pb.command("cmd.exe", "/c", command);
-
-            if (!command.equals(Comandos.STOP)) {
-                pb.redirectErrorStream(true); // Redirige el error al flujo de salida
-            } else {
-                pb.redirectErrorStream(false);
-            }
-            //pb.inheritIO(); //no sirve
 
             // Inicia el proceso
             process = pb.start();
