@@ -1,17 +1,29 @@
 package com.modelo.evaluacion;
 
 /**
- *
+ * Esta clase se utiliza para generar el archivo '.TREC'.
  * @author Prieto
  */
 public class DocumentoRecuperado {
 
+    /**
+     * Numero de consulta
+     */
     private final String numConsulta;
 
+    /**
+     * Numero(.I) de documento
+     */
     private final String numDocumento;
 
+    /**
+     * Ranking en el que el documento se ha recuperado.
+     */
     private final String rank;
 
+    /**
+     * Puntuacion obtenida en la recuperacion del documento.
+     */
     private final String score;
 
     public DocumentoRecuperado(String numConsulta, String numDocumento, String rank, String score) {
@@ -37,6 +49,11 @@ public class DocumentoRecuperado {
         return rank;
     }
 
+    /**
+     * Formato en el que se guarda cada documento recuperado en el archivo 
+     * '.TREC'.
+     * @return 
+     */
     @Override
     public String toString() {
         String s = "";
