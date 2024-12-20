@@ -50,6 +50,7 @@ public class Evaluacion {
         trecevalResultFileName = null;
         nameRelFile = null;
         consultasRecuperadas = new HashMap<>();
+        eliminarDocumentos();
     }
 
     /**
@@ -61,13 +62,12 @@ public class Evaluacion {
         consultasRecuperadas = consultas;
         // ruta donde se crea
         String carpAct = System.getProperty("user.dir");
-        String ruta = Constantes.EVALUATION_PATH + "\\resultados\\";
+        String ruta = Constantes.RESULTADOS_PATH;
         String path = carpAct + ruta;
         String id = getPartName().toUpperCase(); // id del archivo de evaluacion
         trecevalResultFileName = "ev_" + id + ".txt";
         nameRelFile = "MED_REL_" + id + ".TREC"; //nombre dle archivo
         BufferedWriter br = null;
-        eliminarDocumentos();
         try {
             File archivo = new File(path + nameRelFile);
 
@@ -82,6 +82,14 @@ public class Evaluacion {
             System.out.println("Documento de trec " + nameRelFile + " creado");
         } catch (IOException ex) {
             Logger.getLogger(Evaluacion.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -92,18 +100,19 @@ public class Evaluacion {
      */
     public void evaluar() {
         String carpAct = System.getProperty("user.dir");
-        String ruta = Constantes.EVALUATION_PATH + "\\resultados\\";
-        String path = carpAct + ruta;
+        String evaluationPath = carpAct + Constantes.EVALUATION_PATH;
+        String resultsPath = carpAct + Constantes.RESULTADOS_PATH;
 
-        String trecevalOpciones = " -a " + path; 
-        String trecevalArgumentos = "MED_REL.TREC " + path + nameRelFile;
+        String trecevalOpciones = " -a " + evaluationPath; 
+        String trecevalArgumentos = "MED_REL.TREC " + resultsPath + nameRelFile;
         // ruta donde se guardan los resultados
-        String trecevalGuardar = " > " + path + "\\resultados\\" + this.trecevalResultFileName;
+        String trecevalGuardar = " > " + resultsPath + this.trecevalResultFileName;
         String comando = Constantes.TRECEVAL + trecevalOpciones
                 + trecevalArgumentos + trecevalGuardar;
 
+        System.out.println("Comando a ejecutar: " + comando);
         //eliminarDocumento();
-        executeCommand(path, comando);
+        executeCommand(evaluationPath, comando);
         System.out.println("Documento de evaluacion creado " + trecevalResultFileName);
     }
 
@@ -113,8 +122,8 @@ public class Evaluacion {
      */
     private void eliminarDocumentos() {
         String carpAct = System.getProperty("user.dir");
-        String ruta = Constantes.EVALUATION_PATH;
-        String path = carpAct + ruta + "resultados\\";
+        String ruta = Constantes.RESULTADOS_PATH;
+        String path = carpAct + ruta;
         File carpeta = new File(path);
         File[] archivos = carpeta.listFiles();
         for (File f: archivos) {
@@ -125,7 +134,6 @@ public class Evaluacion {
                 System.err.println("Error al eliminar el archivo " + f.getName());
             }
         }
-        
     }
 
     /**

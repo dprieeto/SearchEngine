@@ -1,10 +1,15 @@
 package com.modelo.solr.server;
 
+import com.controlador.Controlador;
 import com.modelo.solr.Comandos;
 import com.modelo.solr.Constantes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -116,6 +121,39 @@ public class SolrServerImp implements SolrServer {
 
             }
         }).start();
+    }
+    
+    @Override
+    public void restartSolr(int timeToWait) {
+        executeCommand(null, Comandos.RESTART_SOLR);
+        while(!SolrServerImp.isSolrServerRunning()) {
+                
+        }
+        if(timeToWait <= 0)
+            timeToWait = 30000; //30 segs
+        try {
+                System.out.println("Esperando a que se termine de reiniciar Solr. Espere");
+                Thread.sleep(timeToWait); // tiempo de espera para que cargue el servidor
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }
+    
+    public static boolean isSolrServerRunning() {
+        try {
+            String solrUrl = "http://localhost:8983/solr";
+            URL url = new URL(solrUrl); // Endpoint para verificar el estado
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(2000); // Tiempo de espera para la conexión
+            connection.setReadTimeout(2000); // Tiempo de espera para la lectura
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == 200; // 200 significa que el servidor está en funcionamiento
+        } catch (IOException e) {
+            //e.printStackTrace();
+            return false; // Si hay una excepción, el servidor no está disponible
+        }
     }
 
 }

@@ -6,6 +6,8 @@ import com.modelo.solr.client.SolrClientImp;
 import com.modelo.solr.server.SolrServer;
 import com.modelo.solr.server.SolrServerImp;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,7 +19,7 @@ public class Controlador {
 
     private SolrServer server;
 
-    private String stopWords;
+    private String stopWordsNameFile;
 
     public Controlador() {
         cliente = null;
@@ -28,6 +30,10 @@ public class Controlador {
         System.out.println("Iniciando Solr");
         server.startSolr();
         server.seeStatus();
+    }
+
+    public void setStopWordsFile(String nameFile) {
+        stopWordsNameFile = nameFile;
     }
 
     /**
@@ -43,6 +49,8 @@ public class Controlador {
         server = new SolrServerImp();
         server.setCoreName(coreName);
         cliente = new SolrClientImp(server.getCore());
+
+        // Schema fields
         String campo = "indice";
         String campoTipo = "string";
         String campo2 = "texto";
@@ -54,38 +62,25 @@ public class Controlador {
             // añadir los campos a schema
             server.getCore().addSchemaField(campo, campoTipo);
             server.getCore().addSchemaField(campo2, campoTipo2);
+
+            updateStopWords(stopWordsNameFile);
+            // reiniciar el servidor
+            System.out.println("\nReiniciando servidor, espere");
+            int tiempoEsperaReinicio = 30000;
+            server.restartSolr(tiempoEsperaReinicio);
+
         }
 
         if (deleteDocuments) {
             cliente.leerArchivoContenido(null);
         }
-        /**
-         * if (!server.getCore().isCoreCreated()) { server.createCore(); //
-         * añadir los campos a schema server.getCore().addSchemaField(campo,
-         * campoTipo); server.getCore().addSchemaField(campo2, campoTipo2); }
-         *
-         * if (deleteCore && server.getCore().isCoreCreated()) {
-         * server.deleteCore(); }
-         *
-         * // si la coleccion existe if (deleteDocuments &&
-         * server.getCore().contarDocumentosIndexados() > 0 &&
-         * server.getCore().isCoreCreated()) {
-         * cliente.leerArchivoContenido(null); }
-         *
-         * // si la coleccion existe y no hay documentos, se indexan if
-         * (server.getCore().contarDocumentosIndexados() == 0 &&
-         * server.getCore().isCoreCreated()) {
-         * cliente.leerArchivoContenido(null); }
-         *
-         */
 
     }
 
     public void doEvaluation() {
-        Evaluacion ev = new Evaluacion(stopWords);
+        Evaluacion ev = new Evaluacion(stopWordsNameFile);
         ev.crearDocumentoEvaluacion(cliente.getConsultasResultados());
         ev.evaluar();
-
     }
 
     /**
@@ -101,10 +96,10 @@ public class Controlador {
      * ingles (stopwords_en.txt).
      * @see com.modelo.solr.Constantes#STOPWORDS_FILES_PATH
      */
-    public void updateStopWords(String fileName) {
-        stopWords = fileName;
+    private void updateStopWords(String fileName) {
+        stopWordsNameFile = fileName;
         cliente.actualizarPalabrasVacias(fileName);
-
+        //cliente.leerArchivoContenido(null);
     }
 
     /**

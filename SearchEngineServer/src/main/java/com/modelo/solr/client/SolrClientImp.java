@@ -29,11 +29,11 @@ import org.apache.solr.common.SolrInputDocument;
 public class SolrClientImp implements SolrClient {
 
     private CoreConf core;
-    
+
     private List<DocumentoRecuperado> documentos;
-    
-    private Map<Integer,List<DocumentoRecuperado>> consultasResultados;
-    
+
+    private Map<Integer, List<DocumentoRecuperado>> consultasResultados;
+
     public SolrClientImp(CoreConf core) {
         this.core = core;
         documentos = new ArrayList<>();
@@ -175,22 +175,10 @@ public class SolrClientImp implements SolrClient {
             //query.setQuery("texto:\""+ consulta + "\""); //busca la consulta como si fuera una frase
             query.setQuery("texto:" + consultaTransformada);
             query.setFields("indice", "score");
-            //query.setRows(0);
-            /*
-            QueryResponse rsp = solr.query(query);
-
-            SolrDocumentList docs = rsp.getResults();
-            long encontrados = rsp.getResults().getNumFound();
-            System.out.println("\nNumero consulta: " + indice + "\nConsulta: "
-                    + consultaTransformada + "\nDocumentos encontrados: " + encontrados + "\n");
-            for (int i = 0; i < docs.size(); ++i) {
-
-                System.out.println(docs.get(i));
-            }*/
             int rows = 100; // Número de documentos por página
             int start = 0;
             long totalDocuments;
-             QueryResponse countResponse = solr.query(query);
+            QueryResponse countResponse = solr.query(query);
             totalDocuments = countResponse.getResults().getNumFound();
 
             System.out.println("####################### consulta " + indice);
@@ -205,17 +193,11 @@ public class SolrClientImp implements SolrClient {
                 List<SolrDocument> documents = response.getResults();
 
                 // Mostrar los documentos recuperados
-                for (int i = 0; i<documents.size(); i++) { 
+                for (int i = 0; i < documents.size(); i++) {
                     String index = indice;
                     String numDoc = documents.get(i).getFieldValue("indice").toString();
                     String rank = String.valueOf(i + 1 + start);
                     String scoreDoc = documents.get(i).getFieldValue("score").toString();
-                    /*
-                    int index = Integer.valueOf(indice);
-                    long numDoc = Long.parseLong(documents.get(i).getFieldValue("indice").toString());
-                    int rank = i+1+start;
-                    long scoreDoc = Long.parseLong((String) documents.get(i).getFieldValue("score"));
-                    *///System.out.println(doc);
                     DocumentoRecuperado dr = new DocumentoRecuperado(index, numDoc, rank, scoreDoc);
                     //System.out.println(dr.toString());
                     documentos.add(dr);
@@ -224,15 +206,14 @@ public class SolrClientImp implements SolrClient {
                 start += rows; // Incrementar el inicio para la siguiente página
             }
             //System.out.println("@@@@@@@@@@@@@@@@ \t" + documentos.size());
-            
             consultasResultados.put(Integer.valueOf(indice), documentos);
-            
+
         } catch (SolrServerException | IOException ex) {
             System.err.println("\nError al realizar la consulta.\n" + ex.getMessage());
         }
 
     }
-    
+
     @Override
     public Map<Integer, List<DocumentoRecuperado>> getConsultasResultados() {
         return consultasResultados;
@@ -254,7 +235,7 @@ public class SolrClientImp implements SolrClient {
         //System.out.println(sb.toString());
         return sb.toString();
     }
-    
+
     private String transformarTextoConsulta(String texto) {
         String regex = "[ .,;:!()-]+"; // el + indica que paparece 1 o mas veces
 
@@ -270,7 +251,6 @@ public class SolrClientImp implements SolrClient {
         //System.out.println(sb.toString());
         return sb.toString();
     }
-
 
     @Override
     public void actualizarPalabrasVacias(String fileName) {
@@ -302,12 +282,7 @@ public class SolrClientImp implements SolrClient {
             //obtener la lista de terminos
             TermsResponse termsResponse = respuesta.getTermsResponse();
             List<Term> terms = termsResponse.getTerms(fieldName);
-            /*
-            for (int i=0; i<50; i++) {
-                System.out.println(i);
-                System.out.println("Termino: " + terms.get(i).getTerm() + "\tFrecuencia: " + terms.get(i).getFrequency());
-            }
-             */
+
             for (Term t : terms) {
                 frequentTerms.add(t.getTerm());
             }

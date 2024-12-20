@@ -51,18 +51,11 @@ public interface SolrServer {
     public CoreConf getCore();
 
     /**
-     * Verifica si existe la coleccion pasada por parametro. Si el valor es null
-     * se verifica la coleccion por defecto.
+     * Reinicia Solr
      *
-     * @param nombre
-     * @return true si la coleccion existe.
+     * @param timeToWait tiempo de espera para el reinicio.
+     * @see https://factorpad.com/tech/solr/reference/solr-restart.html
      */
-    //public boolean isCoreCreated(String nombre);
-    /**
-     * Añade un campo a la coleccion por defecto mediante SchemaRequest.
-     *
-     * @param nombre nombre del campo
-     * @param tipo tipo del campo. p.ej: 'text_en'
-     */
-    //public void addSchemaField(String nombre, String tipo);
+    public void restartSolr(int timeToWait);
+
 }

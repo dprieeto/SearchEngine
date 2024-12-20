@@ -31,5 +31,7 @@ public class Constantes {
     public static final String TRECEVAL = "treceval.exe";
 
     public static final String RELEVANT_DOC = "MED_REL.TREC";
+    
+    public static final String RESULTADOS_PATH = EVALUATION_PATH + "resultados\\";
 
 }

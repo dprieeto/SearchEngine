@@ -39,4 +39,6 @@ public final class Comandos {
     public static final String POST_TOOL = "java -Dc=" + Constantes.NOMBRE_DEFAULT_COLECCION
             + " -Dauto -jar " + Constantes.POST_TOOL + " " + Constantes.DOCS_RUTA + "\\";
     
+    public static final String RESTART_SOLR = Constantes.SCRIPT_NAME + " restart -p 8983";
+    
 }

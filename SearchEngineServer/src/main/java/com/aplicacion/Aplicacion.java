@@ -17,14 +17,14 @@ public class Aplicacion {
         // iniciar solr
         ct.startServer();
 
+        // actualizar palabras vacias: da mejores resultados en5
+        String stopWordsFileName = "stopwords-en5.txt"; 
+        ct.setStopWordsFile(stopWordsFileName);
+        
         // configurar coleccion
-        //ct.buildCoreConf(null, true, true);
-        ct.buildCoreConf(null, false, false);
-
-        // actualizar palabras vacias:
-        String archivo = "stopwords-enDS.txt";
-        ct.updateStopWords(archivo);
-
+        ct.buildCoreConf(null, true, true);
+        //ct.buildCoreConf(null, false, false);
+        
         // realizar consultas
         ct.doQuerys();
 
