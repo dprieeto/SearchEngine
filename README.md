@@ -35,7 +35,7 @@ habria que realizar alguna pequeña modificacion en la clase [Comandos](./Search
 
 ## Instalacion
 
-1. Descargar y descomprimir la carpeta de [Apache Solr]*(#https://solr.apache.org/downloads.html).
+1. Descargar y descomprimir la carpeta de [Apache Solr](https://solr.apache.org/downloads.html).
 2. Copia la carpeta en la ubicación `C:\` y renombra la carpeta a 'solr'.
 3. Ejecutar SearchEngineServer.
 4. Ejecutar SearchEngine.
